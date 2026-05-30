@@ -19,40 +19,40 @@ services:
         constraints:
           - node.hostname == gx10-b3ed
 
-  open-webui:
-    image: ghcr.io/open-webui/open-webui:main
-    volumes:
-      - /home/raffael/Projekte/ollama/.open-webui:/app/backend/data
-    environment:
-      - "PORT=8085"
-      - "OLLAMA_BASE_URL=http://ollama:11434"
-      - "WEBUI_AUTH=false"
-      - "WEBUI_NAME=Open WebUI"
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    networks:
-      - ollama
-      - traefik_traefik-public
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.constraint-label=traefik-public"
-        - "traefik.docker.network=traefik_traefik-public"
-        - "traefik.http.routers.open-webui-http.rule=Host(`${DOMAIN?Variable not set}`)"
-        - "traefik.http.routers.open-webui-http.entrypoints=http"
-        - "traefik.http.routers.open-webui-http.middlewares=https-redirect"
-        - "traefik.http.routers.open-webui-https.rule=Host(`${DOMAIN?Variable not set}`)"
-        - "traefik.http.routers.open-webui-https.entrypoints=https"
-        - "traefik.http.routers.open-webui-https.tls=true"
-        - "traefik.http.routers.open-webui-https.tls.certresolver=le"
-        - "traefik.http.services.open-webui.loadbalancer.server.port=8085"
-      placement:
-        constraints:
-          - node.hostname == gx10-b3ed
+  # open-webui:
+  #   image: ghcr.io/open-webui/open-webui:main
+  #   volumes:
+  #     - /home/raffael/Projekte/ollama/.open-webui:/app/backend/data
+  #   environment:
+  #     - "PORT=8085"
+  #     - "OLLAMA_BASE_URL=http://ollama:11434"
+  #     - "WEBUI_AUTH=false"
+  #     - "WEBUI_NAME=Open WebUI"
+  #   extra_hosts:
+  #     - host.docker.internal:host-gateway
+  #   networks:
+  #     - ollama
+  #     - traefik_traefik-public
+  #   deploy:
+  #     labels:
+  #       - "traefik.enable=true"
+  #       - "traefik.constraint-label=traefik-public"
+  #       - "traefik.docker.network=traefik_traefik-public"
+  #       - "traefik.http.routers.open-webui-http.rule=Host(`${DOMAIN?Variable not set}`)"
+  #       - "traefik.http.routers.open-webui-http.entrypoints=http"
+  #       - "traefik.http.routers.open-webui-http.middlewares=https-redirect"
+  #       - "traefik.http.routers.open-webui-https.rule=Host(`${DOMAIN?Variable not set}`)"
+  #       - "traefik.http.routers.open-webui-https.entrypoints=https"
+  #       - "traefik.http.routers.open-webui-https.tls=true"
+  #       - "traefik.http.routers.open-webui-https.tls.certresolver=le"
+  #       - "traefik.http.services.open-webui.loadbalancer.server.port=8085"
+  #     placement:
+  #       constraints:
+  #         - node.hostname == gx10-b3ed
 
 networks:
-  traefik_traefik-public:
-    external: true  
+  # traefik_traefik-public:
+  #   external: true  
   ollama:
     driver: overlay
     attachable: true

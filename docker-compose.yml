@@ -1,58 +1,30 @@
 services:
   ollama:
     image: ollama/ollama:latest
-    tty: true
-    networks:
-      - ollama
-    ports:
-      - target: 11434
-        published: 11434
-        mode: host
+    networks: [backend]
     volumes:
       - /home/raffael/Projekte/ollama/.ollama:/root/.ollama
-    environment:
-      - "OLLAMA_HOST=0.0.0.0"
-      - "OLLAMA_ORIGINS=http://localhost,https://localhost,http://127.0.0.1,https://127.0.0.1,http://0.0.0.0,https://0.0.0.0,vscode-webview://*"
-      - "OLLAMA_NUM_CTX=32768"
-    deploy:
-      placement:
-        constraints:
-          - node.hostname == gx10-b3ed
+    # bewusst keine ports: -> nur intern im Overlay erreichbar
 
-  # open-webui:
-  #   image: ghcr.io/open-webui/open-webui:main
-  #   volumes:
-  #     - /home/raffael/Projekte/ollama/.open-webui:/app/backend/data
-  #   environment:
-  #     - "PORT=8085"
-  #     - "OLLAMA_BASE_URL=http://ollama:11434"
-  #     - "WEBUI_AUTH=false"
-  #     - "WEBUI_NAME=Open WebUI"
-  #   extra_hosts:
-  #     - host.docker.internal:host-gateway
-  #   networks:
-  #     - ollama
-  #     - traefik_traefik-public
-  #   deploy:
-  #     labels:
-  #       - "traefik.enable=true"
-  #       - "traefik.constraint-label=traefik-public"
-  #       - "traefik.docker.network=traefik_traefik-public"
-  #       - "traefik.http.routers.open-webui-http.rule=Host(`${DOMAIN?Variable not set}`)"
-  #       - "traefik.http.routers.open-webui-http.entrypoints=http"
-  #       - "traefik.http.routers.open-webui-http.middlewares=https-redirect"
-  #       - "traefik.http.routers.open-webui-https.rule=Host(`${DOMAIN?Variable not set}`)"
-  #       - "traefik.http.routers.open-webui-https.entrypoints=https"
-  #       - "traefik.http.routers.open-webui-https.tls=true"
-  #       - "traefik.http.routers.open-webui-https.tls.certresolver=le"
-  #       - "traefik.http.services.open-webui.loadbalancer.server.port=8085"
-  #     placement:
-  #       constraints:
-  #         - node.hostname == gx10-b3ed
+  ollama-tailscale:
+    image: ollama-tailscale-sidecar:latest
+    hostname: ollama
+    networks: [backend]
+    volumes:
+      - ts_state:/var/lib/tailscale
+    secrets:
+      - ts_authkey
+    deploy:
+      replicas: 1
 
 networks:
-  # traefik_traefik-public:
-  #   external: true  
-  ollama:
+  backend:
     driver: overlay
-    attachable: true
+
+secrets:
+  ts_authkey:
+    external: true
+
+volumes:
+  ollama_data:
+  ts_state:

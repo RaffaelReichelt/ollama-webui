@@ -106,6 +106,14 @@ FAILED=()
 for model in "${TARGET_MODELS[@]}"; do
     log "----- $model -----"
 
+    # Modell könnte während eines langen Laufs gelöscht worden sein -> nicht neu anlegen.
+    # Explizit mit -m angegebene Modelle werden trotzdem gezogen (bewusste Neuinstallation).
+    if [ "${#ONLY_MODELS[@]}" -eq 0 ] && \
+       ! docker exec "$CONTAINER" ollama list | tail -n +2 | awk '{print $1}' | grep -qxF "$model"; then
+        log "-> inzwischen entfernt, übersprungen"
+        continue
+    fi
+
     if $DRY_RUN; then
         # Kein echter Pull; nur digest-basierte Prüfung via 'ollama show' o.ä. ist
         # in Ollama nicht direkt vorgesehen, daher informativer Hinweis:

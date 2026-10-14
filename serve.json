@@ -1,0 +1,16 @@
+{
+  "TCP": {
+    "11434": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "${TS_CERT_DOMAIN}:11434": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://ollama:11434"
+        }
+      }
+    }
+  }
+}

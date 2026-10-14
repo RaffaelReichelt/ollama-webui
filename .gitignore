@@ -1,2 +1,5 @@
 .ollama
 .open-webui
+openclaw-data/
+*.log
+bench_*.csv

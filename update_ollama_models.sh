@@ -11,14 +11,17 @@
 #   ./update_ollama_models.sh -m modelA -m modelB # nur bestimmte Modelle
 #   ./update_ollama_models.sh -x jina-v5-text     # alle außer diesem Modell
 #   ./update_ollama_models.sh -n                  # Dry-Run (nur Statusprüfung)
-#   ./update_ollama_models.sh -c ollama-prod      # anderer Containername
+#   ./update_ollama_models.sh -c ollama-prod      # anderer Container-/Servicename
+#
+# -c akzeptiert einen Containernamen oder einen Swarm-Servicenamen
+# (Default: ollama_ollama -> Container ollama_ollama.1.<task-id>).
 #
 # Env-Var Alternative statt -c:
 #   OLLAMA_CONTAINER=ollama-prod ./update_ollama_models.sh
 
 set -euo pipefail
 
-CONTAINER="${OLLAMA_CONTAINER:-ollama}"
+CONTAINER="${OLLAMA_CONTAINER:-ollama_ollama}"
 DRY_RUN=false
 declare -a ONLY_MODELS=()
 declare -a EXCLUDE_MODELS=()
@@ -51,12 +54,16 @@ if ! command -v docker >/dev/null 2>&1; then
     exit 1
 fi
 
-if ! docker ps --format '{{.Names}}' | grep -qx "$CONTAINER"; then
-    echo "Fehler: Container '$CONTAINER' läuft nicht (docker ps zeigt ihn nicht)." >&2
+# Container auflösen: exakter Name, sonst Swarm-Task "<service>.<slot>.<task-id>"
+RESOLVED=$(docker ps --format '{{.Names}}' | grep -E -x -m1 "${CONTAINER}|${CONTAINER}\.[0-9]+\.[a-z0-9]+" || true)
+
+if [ -z "$RESOLVED" ]; then
+    echo "Fehler: Container oder Swarm-Service '$CONTAINER' läuft nicht (docker ps zeigt ihn nicht)." >&2
     echo "Verfügbare laufende Container:" >&2
     docker ps --format '  - {{.Names}}' >&2
     exit 1
 fi
+CONTAINER="$RESOLVED"
 
 log "Starte Ollama-Modell-Update in Container '$CONTAINER' (Dry-Run: $DRY_RUN)"
 

@@ -45,5 +45,5 @@ Das Secret `ts_authkey` wird systemseitig rotiert (Skript im Projekt `key-rotati
 `-m` für einzelne Modelle, `-x` zum Ausschließen). Der Container wird automatisch gefunden,
 auch als Swarm-Task `ollama_ollama.1.<id>`. Bereits entfernte Modelle werden nicht neu angelegt.
 
-`bench/`-Ergebnisse (`bench_*.csv`) und Update-Logs (`*.log`) werden nicht versioniert.
+Benchmark-Ergebnisse (`bench_*.csv`) und Update-Logs (`*.log`) werden nicht versioniert.
 `ollama_bench.py` erzeugt die Benchmarks.
